@@ -1,5 +1,5 @@
 import { Card, Status } from "@/models/card"
-import { CellObject, WorkBook } from "xlsx"
+import { CellObject, ExcelDataType, WorkBook } from "xlsx"
 
 export const processFile = (workbook: WorkBook) => {
     const worksheet = workbook.Sheets[workbook.SheetNames[0]]
@@ -50,6 +50,16 @@ export const processFile = (workbook: WorkBook) => {
             currentRow = row
         }
 
+        const previousColumn = rows[currentRow - rowOffset].slice(-1)[0]?.key
+        if (previousColumn) {
+            const compare = column.charCodeAt(0) - previousColumn.charCodeAt(0)
+            if (compare > 1) {
+                // We have skipped columns because of empty values
+                const missingColumn = rows[0][rows[currentRow - rowOffset].length].key[0]
+                rows[currentRow - rowOffset].push({ key: missingColumn, obj: { t: "s", v: "" } })
+            }
+        }
+
         rows[currentRow - rowOffset].push({ key, obj: { ...worksheet[key], h: worksheet[key].h ?? '' } as CellObject })
     })
 
@@ -62,11 +72,12 @@ export const processFile = (workbook: WorkBook) => {
         }
 
         row.forEach((cell, cellIndex) => {
+            const header = rows[0][cellIndex].obj.v!
             if (rowIndex === 0) {
                 // First row indicates table title
-            } else if (rows[0][cellIndex].obj.v! === "Name") {
+            } else if (header === "Name") {
                 item.name = cell.obj.v?.toString() ?? ""
-            } else if (rows[0][cellIndex].obj.v! === "Status") {
+            } else if (header === "Status") {
                 item.status = cell.obj.v?.toString() as Status ?? "NOT_OWNED"
             }
         })

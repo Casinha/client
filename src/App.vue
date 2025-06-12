@@ -228,15 +228,15 @@ const getColourAsClass = (colour: string) => {
                       <Button variant="secondary">View</Button>
                     </PopoverTrigger>
                     <PopoverContent class="bg-black">
-                      <img :src="card.urisBySet.get(selectedSet)!.large" />
+                      <img v-if="card.urisBySet.get(selectedSet)!.large || card.urisBySet.get(selectedSet)!.normal" :src="card.urisBySet.get(selectedSet)!.large ?? card.urisBySet.get(selectedSet)!.normal" />
                     </PopoverContent>
                   </Popover>
                 </TableCell>
                 <TableCell>
-                  <Button v-if="!collectedCards.has(card.name)" variant="secondary" @click="() => {
+                  <Button v-if="!collectedCards.has(card.name)" class="bg-green-600" @click="() => {
                     markAsCollected(card.name)
                   }">Add to Collection</Button>
-                  <Button v-else variant="secondary" @click="() => {
+                  <Button v-else variant="destructive" @click="() => {
                     collectedCards.delete(card.name)
                   }">Remove from Collection</Button>
                 </TableCell>
