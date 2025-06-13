@@ -1,5 +1,30 @@
-import { Card, Status } from "@/models/card"
-import { CellObject, ExcelDataType, WorkBook } from "xlsx"
+import { Card, CardUris, JsonFriendlyWrappedScryfallCard, Status, WrappedScryfallCard } from "@/models/card"
+import { CellObject, WorkBook } from "xlsx"
+
+export const sanitiseWrappedCard = (wrapper: WrappedScryfallCard): JsonFriendlyWrappedScryfallCard => {
+    const urisBySet: { [index: string]: CardUris } = {}
+
+    for (let key of wrapper.card.urisBySet.keys()) {
+        urisBySet[key] = wrapper.card.urisBySet.get(key)!
+    }
+
+    const card = { ...wrapper.card, urisBySet }
+
+    const jsonFriendly: JsonFriendlyWrappedScryfallCard = { ...wrapper, card }
+
+    return jsonFriendly
+}
+
+export const serialiseWrappedCard = (wrapper: JsonFriendlyWrappedScryfallCard): WrappedScryfallCard => {
+    const urisBySet: Map<string, CardUris> = new Map()
+
+    for (let key of Object.keys(wrapper.card.urisBySet)) {
+        urisBySet.set(key, wrapper.card.urisBySet[key])
+    }
+
+    const card = { ...wrapper.card, urisBySet }
+    return { ...wrapper, card }
+}
 
 export const processFile = (workbook: WorkBook) => {
     const worksheet = workbook.Sheets[workbook.SheetNames[0]]
